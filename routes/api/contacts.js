@@ -1,25 +1,54 @@
-const express = require('express')
+const express = require("express");
 
-const router = express.Router()
+const { HttpError } = require("../../helpers");
 
-router.get('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+const router = express.Router();
 
-router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+const {
+  listContacts,
+  getContactById,
+  addContact,
+} = require("../../models/contacts");
 
-router.post('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/", async (req, res, next) => {
+  try {
+    const result = await listContacts();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 
-router.delete('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/:contactId", async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
 
-router.put('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+    const result = await getContactById(contactId);
+    if (!result) {
+      throw HttpError(404, "Not Found");
+    }
+    res.json(result);
+  } catch (error) {
+    const { status = 500, message = "Server error" } = error;
 
-module.exports = router
+    res.status(status).json(message);
+  }
+});
+
+router.post("/", async (req, res, next) => {
+  const result = await addContact(req.body);
+
+  res.json(result);
+});
+
+router.delete("/:contactId", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
+
+router.put("/:contactId", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
+
+module.exports = router;
