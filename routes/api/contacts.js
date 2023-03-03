@@ -8,6 +8,8 @@ const {
   listContacts,
   getContactById,
   addContact,
+  removeContact,
+  updateContact,
 } = require("../../models/contacts");
 
 router.get("/", async (req, res, next) => {
@@ -44,6 +46,22 @@ router.post("/", async (req, res, next) => {
 });
 
 router.delete("/:contactId", async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+
+    const result = await removeContact(contactId);
+
+    if (!result) {
+      throw HttpError(404, "Not Found");
+    }
+
+    return res.json(result);
+  } catch (error) {
+    const { status = 500, message = "Server error" } = error;
+
+    res.status(status).json(message);
+  }
+
   res.json({ message: "template message" });
 });
 

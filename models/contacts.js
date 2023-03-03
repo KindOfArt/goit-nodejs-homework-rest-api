@@ -1,3 +1,4 @@
+const { nanoid } = require("nanoid/async");
 const fs = require("fs/promises");
 const path = require("path");
 
@@ -25,27 +26,29 @@ const getContactById = async (contactId) => {
   }
 };
 
-const removeContact = async (contactId) => {};
+const removeContact = async (contactId) => {
+  try {
+    const result = await listContacts();
 
-const createId = (result) => {
-  const idList = result.map(({ id }) => Number(id));
+    const filteredList = result.filter(({ id }) => id !== contactId.toString());
 
-  const lastId = idList[idList.length - 1];
+    await fs.writeFile(contactsPath, JSON.stringify(filteredList));
 
-  const newId = lastId + 1;
-
-  return newId;
+    return filteredList;
+  } catch ({ message }) {
+    return message;
+  }
 };
 
 const addContact = async (body) => {
   try {
-    const result = await listContacts();
+    const list = await listContacts();
 
-    const newId = createId(result);
+    const newId = await nanoid(10);
 
-    const newContact = await { id: newId.toString(), ...body };
+    const newContact = { id: newId.toString(), ...body };
 
-    const newContactsList = [...result, newContact];
+    const newContactsList = [...list, newContact];
 
     await fs.writeFile(contactsPath, JSON.stringify(newContactsList));
 
